@@ -4,6 +4,8 @@
 
 ![Taiwan Weather GIS Roadmap - Courage the Cowardly Dog](static/weather_roadmap_courage.jpg)
 
+![AI Coding Agent Workflow - Courage the Cowardly Dog](static/courage_ai_coding_workflow.jpg)
+
 ---
 
 ## 0. Course Roadmap & Learning Pipeline (AI 創新微課程)
