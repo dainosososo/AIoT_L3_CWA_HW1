@@ -2,7 +2,7 @@
 
 > **Project**: AIoT Level 3 Homework 1 (`AIoT_L3_CWA_HW1`)  
 > **Data Source**: [CWA OpenData Platform](https://opendata.cwa.gov.tw/index)  
-> **Reference**: 24-Step AI Innovation Micro-Course Roadmap (AI 創新微課程 - 台灣天氣預報應用)
+> **Reference**: 24-Step AI Innovation Micro-Course Roadmap (AI 創新微課程 - 台灣天氣預報應用) & 5 Milestone Gates
 
 ---
 
@@ -10,26 +10,27 @@
 
 ```mermaid
 flowchart TD
-    subgraph Phase 1: Data Ingestion & Storage
-        A[CWA OpenData Platform<br/>opendata.cwa.gov.tw] -->|1. Requests JSON| B[Python CWA API Ingestion Engine]
+    subgraph Phase 1: Data Ingestion & Storage (Gates 1 & 2)
+        A[CWA OpenData Platform<br/>opendata.cwa.gov.tw] -->|1. Requests JSON| B[Python CWA API Ingestion Engine<br/>cwa_api.py]
         B -->|2. Extract MinT / MaxT / Wx| C[Pandas Data Cleaning & Normalization]
-        C -->|3. Insert / Update| D[(SQLite Database<br/>data.db)]
+        C -->|3. ETL Insert / Replace| D[(SQLite Database<br/>data.db / database.py)]
     end
 
-    subgraph Phase 2: Web App & Temperature Chart
-        D -->|4. SQL Query| E[Streamlit Weather Dashboard Engine]
+    subgraph Phase 2: Web App & Temperature Chart (Gate 3)
+        D -->|4. SQL Query| E[FastAPI / Streamlit Engine<br/>app.py]
         E --> F[Region Selector Dropdown<br/>北部 / 中部 / 南部 / 東部 / 離島]
         E --> G[📈 Temperature Line Chart<br/>MaxT vs MinT Daily Trend]
         E --> H[📋 Weekly Forecast Table<br/>Date, MinT, MaxT, Wx]
     end
 
-    subgraph Phase 3: Taiwan Map Visualization
-        E --> I[🗺️ Taiwan Interactive Weather Map<br/>Folium / Leaflet / Windy]
+    subgraph Phase 3: Taiwan Map Visualization (Gate 3)
+        E --> I[🗺️ Taiwan Interactive Weather Map<br/>Leaflet / OpenStreetMap / GeoJSON]
         I --> J[Color Scale Markers<br/>🔵 <20°C | 🟢 20-25°C | 🟡 25-30°C | 🔴 >30°C]
     end
 
-    subgraph Phase 4: GitHub Deployment
+    subgraph Phase 4: Security & Deployment (Gates 4 & 5)
         E --> K[Octocat GitHub Synchronization<br/>AIoT_L3_CWA_HW1 Repository]
+        K --> L[Vercel Serverless Auto-Deploy<br/>vercel.json]
     end
 ```
 
@@ -43,7 +44,7 @@ flowchart TD
 └─────────────────────────────────────────────────────────────────────────────┘
   [Phase A: API & Data]      [Phase B: Web UI & Chart]   [Phase C: Map & GitHub]
  ┌────────────────────────┐  ┌────────────────────────┐  ┌─────────────────────┐
- │ • Fetch CWA JSON       │  │ • Streamlit Dashboard  │  │ • Folium Map        │
+ │ • Fetch CWA JSON       │  │ • Streamlit Dashboard  │  │ • Leaflet GIS Map   │
  │ • Clean with Pandas    │─>│ • Region Dropdown      │─>│ • Temp Color Scale  │
  │ • Store in SQLite DB   │  │ • MaxT / MinT Line    │  │ • Date Picker       │
  │ • SQL Query Layer      │  │ • Weekly Data Table    │  │ • Push to GitHub    │
@@ -52,7 +53,36 @@ flowchart TD
 
 ---
 
-## 3. 24-Step Micro-Course Roadmap Integration
+## 3. 五大驗收關卡實作細節 (5 Milestone Gates Implementation)
+
+| 關卡 (Gate) | 要做什麼 (Action) | 驗收重點 (Acceptance Criteria) | 實作檔案 (Files) |
+| :--- | :--- | :--- | :--- |
+| **1. CWA API** | 用 API Key 取得真實 CWA Forecast JSON (`F-C0032-001`) | HTTP 成功，取得 Location、Time、Weather (`Wx`)、MinT、MaxT、PoP (降雨機率)。包含離線備用生成器。 | [cwa_api.py](file:///C:/Users/user/.gemini/antigravity/scratch/AIoT_L3_CWA_HW1/cwa_api.py) |
+| **2. Database** | 真實 JSON -> ETL Pipeline -> SQLite | SQL 可以正確查到各地區天氣資料，完成 `INSERT OR REPLACE` 重複資料處理。 | [database.py](file:///C:/Users/user/.gemini/antigravity/scratch/AIoT_L3_CWA_HW1/database.py) |
+| **3. Taiwan GIS** | SQLite -> Web -> Taiwan Map (7 個小步驟) | Leaflet + OpenStreetMap + GeoJSON，地圖上的天氣資料必須直接來自 SQLite DB。 | [app.py](file:///C:/Users/user/.gemini/antigravity/scratch/AIoT_L3_CWA_HW1/app.py)<br/>[static/index.html](file:///C:/Users/user/.gemini/antigravity/scratch/AIoT_L3_CWA_HW1/static/index.html) |
+| **4. GitHub** | 整理並 Push 完整專案到 GitHub | README/workflow 完整，配置 `.gitignore` 確保 `.env` API Key 與 Secret 絕對不可上傳。 | [.gitignore](file:///C:/Users/user/.gemini/antigravity/scratch/AIoT_L3_CWA_HW1/.gitignore)<br/>[.env.example](file:///C:/Users/user/.gemini/antigravity/scratch/AIoT_L3_CWA_HW1/.env.example) |
+| **5. Vercel** | GitHub -> Vercel 自動部署 | Public URL 運作正常，GitHub Push 可自動觸發 Vercel Auto Deploy。 | [vercel.json](file:///C:/Users/user/.gemini/antigravity/scratch/AIoT_L3_CWA_HW1/vercel.json) |
+
+### 🔍 Gate 3 的 7 個小步驟 (Gate 3 Sub-steps)
+
+```text
+3A: Taiwan Map 初始化 ─> 3B: One Location Marker ─> 3C: Weather Popup ─> 3D: Taiwan Locations (22 縣市)
+                                                                                  │
+3G: Full GIS Dashboard ◄─ 3F: Taiwan GeoJSON ◄─ 3E: Database -> GIS API ◄─────────┘
+(選單過濾/折線圖/圖例)
+```
+
+1. **3A Taiwan Map**： Leaflet 暗色系質感地圖初始化，定位於台灣中心 (`23.7°N, 120.95°E`)。
+2. **3B One Location Marker**：根據氣溫動態標註彩色圓點 (🔵 <20°C, 🟢 20-25°C, 🟡 25-30°C, 🔴 >30°C)。
+3. **3C Weather Popup**：點擊 Marker 顯示地點、即時氣溫、天氣現象、最低/最高溫與降雨機率。
+4. **3D Taiwan Locations**：涵蓋全台灣 22 縣市地理座標與氣象監測站點。
+5. **3E Database -> GIS**：透過 FastAPI `/api/gis/locations` 直接綁定 SQLite `data.db` 數據。
+6. **3F Taiwan GeoJSON**：提供標準 GeoJSON FeatureCollection 格式接口。
+7. **3G Full GIS Dashboard**：整合地區選單過濾 (全臺/北部/中部/南部/東部/離島)、統計面板、氣溫圖例與 Chart.js MaxT/MinT 折線圖。
+
+---
+
+## 4. 24-Step Micro-Course Roadmap Integration
 
 The system directly implements the 24-step micro-course learning roadmap:
 
@@ -69,57 +99,19 @@ The system directly implements the 24-step micro-course learning roadmap:
 
 ---
 
-## 4. Phase-by-Phase Detailed Workflow
-
-### Phase A: Data Ingestion & Storage (Steps 1–10)
-1. **API Acquisition**: Use Python `requests` / `httpx` to retrieve weather forecast JSON datasets (`F-C0032-001` 36-hour / 7-day forecast) and observation feeds from `opendata.cwa.gov.tw`.
-2. **JSON Structure Parsing**: Parse location arrays (`locationName`), weather elements (`MinT` minimum temperature, `MaxT` maximum temperature, `Wx` weather phenomenon), and time intervals.
-3. **Data Transformation with Pandas**: Clean invalid values, structure fields, and aggregate statistics across Taiwan regions (`北部地區`, `中部地區`, `南部地區`, `東部地區`, `離島地區`).
-4. **SQLite Storage (`data.db`)**: Store cleaned regional forecast records into a local SQLite database (`TemperatureForecasts` table).
-5. **SQL Query Engine**: Validate data integrity via SQL queries to prevent duplicate insertions and ensure fresh dataset updates.
-
----
-
-### Phase B: Interactive Web App & Temperature Line Chart (Steps 11–16)
-6. **Streamlit App Setup**: Initialize the web application frontend (`app.py`).
-7. **Region Selector**: Interactive dropdown menu allowing users to select regional views (`北部地區`, `中部地區`, etc.).
-8. **Temperature Line Graph (📈 折線圖)**:
-   - **X-Axis**: Forecast dates (e.g., `04/14`, `04/15`, `04/16`...)
-   - **Y-Axis**: Temperature in Celsius (°C)
-   - **Dual-Line Display**: **MaxT** (Red curve for daily maximum) vs. **MinT** (Blue curve for daily minimum).
-9. **Weekly Forecast Table (📋 資料表格)**: A clean tabular overview displaying Date, MinT, MaxT, and weather conditions.
-
----
-
-### Phase C: Taiwan Weather Map Visualization (Steps 17–20)
-10. **Interactive Taiwan Weather Map (🗺️ 地圖視覺化)**: Render an interactive map of Taiwan using `Folium` / `Leaflet` / `Windy API`.
-11. **Temperature Color Legend**:
-    - `< 20°C` 🔵 **Cold** (Blue)
-    - `20 – 25°C` 🟢 **Comfortable** (Green)
-    - `25 – 30°C` 🟡 **Warm** (Yellow)
-    - `> 30°C` 🔴 **Hot** (Red)
-12. **Date Picker Filter**: Interactive date controls allowing users to view map temperature distributions across different days.
-13. **Unified Dashboard**: Combine region selector, line graph, weather table, and interactive map into a single cohesive interface.
-
----
-
-### Phase D: GitHub Deployment & Extension (Steps 21–24)
-14. **GitHub Synchronization**: Commit and push all modular source code (`app.py`, `cwa_api.py`, `database.py`, `charts.py`, `map_viz.py`, `README.md`, `workflow.md`) to GitHub repository [https://github.com/dainosososo/AIoT_L3_CWA_HW1.git](https://github.com/dainosososo/AIoT_L3_CWA_HW1.git).
-15. **Future AI Extensions**: Integration with Line Bot alerts, disaster prevention warnings, and AI-driven weather insights.
-
----
-
 ## 5. File Structure
 
 ```text
 AIoT_L3_CWA_HW1/
 ├── README.md                   # Project overview & design specification
-├── workflow.md                 # Detailed workflow & architecture (this file)
-├── requirements.txt            # Python dependencies (Streamlit, Folium, Pandas, Requests, etc.)
+├── workflow.md                 # Detailed workflow, 5 Gates & architecture (this file)
+├── requirements.txt            # Python dependencies (FastAPI, Uvicorn, Pandas, Requests, etc.)
 ├── .env.example                # CWA OpenData API Key configuration template
-├── app.py                      # Streamlit Main Web Dashboard
-├── cwa_api.py                  # CWA OpenData Fetching & Ingestion Service
-├── database.py                 # SQLite DB Setup & Query Utilities
-├── charts.py                   # MaxT / MinT Line Chart Generators
-└── map_viz.py                  # Folium / Leaflet Taiwan Weather Map Engine
+├── .gitignore                  # Git secret protection
+├── app.py                      # FastAPI Main Web & GIS API Server (Gate 3)
+├── cwa_api.py                  # CWA OpenData Ingestion & Fallback Engine (Gate 1)
+├── database.py                 # SQLite DB Setup & ETL Deduplication (Gate 2)
+├── vercel.json                 # Vercel Serverless Auto-Deployment Config (Gate 5)
+└── static/
+    └── index.html              # Leaflet GIS Map & Chart.js Dashboard (Gate 3)
 ```
