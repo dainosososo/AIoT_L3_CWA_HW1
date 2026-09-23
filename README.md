@@ -2,6 +2,18 @@
 
 [![Taiwan Weather Forecast](https://img.shields.io/badge/AIoT--L3-CWA--Weather-blue.svg)](#) [![Python FastAPI](https://img.shields.io/badge/Backend-FastAPI-green.svg)](#) [![Windy API Leaflet](https://img.shields.io/badge/Frontend-Windy%20%2B%20Leaflet-orange.svg)](#)
 
+---
+
+## 📌 作業繳交連結 (Submission Links)
+
+* **① GitHub Repository：**  
+  👉 [https://github.com/dainosososo/AIoT_L3_CWA_HW1](https://github.com/dainosososo/AIoT_L3_CWA_HW1)
+
+* **② Live Website (線上即時運行網站)：**  
+  👉 [https://a-io-t-l3-cwa-hw-1-tawny.vercel.app/](https://a-io-t-l3-cwa-hw-1-tawny.vercel.app/)
+
+---
+
 ![Taiwan Weather GIS Roadmap - Courage the Cowardly Dog](static/weather_roadmap_courage.jpg)
 
 ![AI Coding Agent Workflow - Courage the Cowardly Dog](static/courage_ai_coding_workflow.jpg)
