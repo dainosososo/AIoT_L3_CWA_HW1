@@ -4,6 +4,8 @@
 > **Data Source**: [CWA OpenData Platform](https://opendata.cwa.gov.tw/index)  
 > **Reference**: 24-Step AI Innovation Micro-Course Roadmap (AI 創新微課程 - 台灣天氣預報應用) & 5 Milestone Gates
 
+![AI Coding Agent Workflow - Courage the Cowardly Dog](static/courage_ai_coding_workflow.jpg)
+
 ---
 
 ## 1. System Architecture Diagram (Mermaid)
