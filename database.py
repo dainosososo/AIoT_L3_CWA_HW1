@@ -33,10 +33,21 @@ def init_db():
                 max_temp REAL NOT NULL,
                 avg_temp REAL NOT NULL,
                 pop REAL NOT NULL,
+                humidity REAL DEFAULT 70.0,
+                wind_speed REAL DEFAULT 3.2,
+                comfort TEXT DEFAULT '舒適',
                 updated_at TEXT NOT NULL,
                 UNIQUE(location_name, start_time)
             );
         """)
+        # Backward-compatible column check
+        existing_cols = [c[1] for c in cursor.execute("PRAGMA table_info(weather_forecasts);").fetchall()]
+        if "humidity" not in existing_cols:
+            cursor.execute("ALTER TABLE weather_forecasts ADD COLUMN humidity REAL DEFAULT 70.0;")
+        if "wind_speed" not in existing_cols:
+            cursor.execute("ALTER TABLE weather_forecasts ADD COLUMN wind_speed REAL DEFAULT 3.2;")
+        if "comfort" not in existing_cols:
+            cursor.execute("ALTER TABLE weather_forecasts ADD COLUMN comfort TEXT DEFAULT '舒適';")
         conn.commit()
 
 def save_forecasts(records: List[Dict[str, Any]]) -> int:
@@ -48,12 +59,15 @@ def save_forecasts(records: List[Dict[str, Any]]) -> int:
             cursor.execute("""
                 INSERT OR REPLACE INTO weather_forecasts (
                     location_name, region, lat, lon, start_time, end_time,
-                    weather, min_temp, max_temp, avg_temp, pop, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    weather, min_temp, max_temp, avg_temp, pop,
+                    humidity, wind_speed, comfort, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """, (
                 r["location_name"], r["region"], r["lat"], r["lon"],
                 r["start_time"], r["end_time"], r["weather"],
-                r["min_temp"], r["max_temp"], r["avg_temp"], r["pop"], r["updated_at"]
+                r["min_temp"], r["max_temp"], r["avg_temp"], r["pop"],
+                r.get("humidity", 70.0), r.get("wind_speed", 3.2), r.get("comfort", "舒適"),
+                r["updated_at"]
             ))
             inserted_count += 1
         conn.commit()

@@ -60,6 +60,9 @@ def get_gis_locations(region: str = None):
                     "max_temp": loc["max_temp"],
                     "avg_temp": loc["avg_temp"],
                     "pop": loc["pop"],
+                    "humidity": loc["humidity"] if "humidity" in loc.keys() else 70.0,
+                    "wind_speed": loc["wind_speed"] if "wind_speed" in loc.keys() else 3.2,
+                    "comfort": loc["comfort"] if "comfort" in loc.keys() else "舒適",
                     "start_time": loc["start_time"],
                     "updated_at": loc["updated_at"]
                 }

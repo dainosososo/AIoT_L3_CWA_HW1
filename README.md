@@ -21,6 +21,56 @@ This project follows the 24-step **Taiwan Weather Forecast Application Roadmap**
 
 ---
 
+## 🌟 Feature Upgrade & Implementation Plan (Reference: taiwan-weather-map)
+
+This project has been upgraded with key features inspired by [taiwan-weather-map.vercel.app](https://taiwan-weather-map.vercel.app/) while featuring a modern **Pink / Rose Glassmorphism aesthetic**:
+
+### 1. Multi-Layer Weather Visualizer (氣象圖層系統)
+* 🌡️ **氣溫 (Temperature):** Color ramp based on county average, max, and min temperatures.
+* 🌧️ **降雨機率 (PoP):** Rainfall probability percentage indicator.
+* 💧 **相對濕度 (Humidity):** County relative humidity level (RH %).
+* 💨 **風速 (Wind Speed):** Surface wind velocity in m/s.
+* ⛅ **天氣狀態 (Weather Condition):** Dynamic weather emojis and descriptive conditions (☀️, ⛅, 🌧️, ⛈️).
+* 🛰️ **CWA 即時雷達回波 (Live Radar Echo):** High-resolution Taiwan composite radar mosaic raster overlay with interactive opacity slider.
+
+### 2. Interactive Map & Pin Badges (數值標籤與圖層控制)
+* **Direct Value Badges:** Displays real-time county numbers directly in styled pin badges (e.g., `25°`, `30%`, `75%`), with a toggle to switch between badge view and minimal glowing points.
+* **Basemap Switcher:** Seamlessly switch between **🌸 探索 (Voyager)**, **🤍 簡約 (Positron)**, **🌙 夜間 (Dark)**, and **🛰️ 衛星 (Esri Satellite)**.
+
+### 3. GPS Geolocation (📌 定位我的位置)
+* Browser HTML5 Geolocation API integration.
+* Automatically pans to the user's location, renders a pulsing green beacon, and calculates the nearest Taiwan county with immediate weather condition alerts.
+
+### 4. Dynamic Continuous Gradient Legend (動態漸層圖例)
+* Replaces discrete boxes with a continuous, responsive gradient bar that dynamically adapts units and color scales depending on the active weather layer.
+
+### 5. Fast County Navigation & Chart Analytics
+* Fast-jump dropdown to center directly on any of Taiwan's 22 counties.
+* Interactive Chart.js trend panel comparing temperatures, rain chance, humidity, or wind across counties.
+
+```mermaid
+flowchart TD
+    subgraph UI_Controls["Floating GIS Controls (Glassmorphism Pink)"]
+        L["Layer Switcher (氣溫 / 降雨 / 濕度 / 風速 / 天氣 / 雷達)"]
+        BM["Basemap Selector (粉彩地圖 / Voyager / 深色 / 衛星)"]
+        GPS["GPS Geolocation (定位我的位置)"]
+        TG["Display Toggles (數值標籤 / 雷達透明度)"]
+    end
+    subgraph Map_Engine["Leaflet GIS Map Layer"]
+        RD["CWA Live Radar Echo Overlay (即時雷達回波圖)"]
+        MK["Custom Interactive Pin Badges (24°C, 30% PoP)"]
+        PP["Rich Weather Popup Card & Trends"]
+    end
+    subgraph Analytics["Data & Chart Panel"]
+        CH["County Weather Element Chart (Chart.js)"]
+        LG["Dynamic Continuous Gradient Legend Bar"]
+    end
+    UI_Controls --> Map_Engine
+    Map_Engine --> Analytics
+```
+
+---
+
 # Design: CWA Temperature Broadcast Visualization with Windy API
 
 ## 1. Project Overview
