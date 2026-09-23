@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Public Taiwan Weather GIS Dashboard</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Google Fonts & FontAwesome Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js for Temperature Line Chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --panel-bg: rgba(30, 41, 59, 0.85);
+      --panel-border: rgba(255, 255, 255, 0.1);
+      --accent-blue: #38bdf8;
+      --accent-orange: #fb923c;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Bar Header */
+    header {
+      height: 60px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 1000;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand i {
+      font-size: 24px;
+      color: var(--accent-blue);
+    }
+
+    .brand h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    select, button {
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid var(--panel-border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    select:hover, button:hover {
+      border-color: var(--accent-blue);
+      background: #334155;
+    }
+
+    button.btn-primary {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border: none;
+      font-weight: 600;
+    }
+
+    button.btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    /* Main Container */
+    #main-container {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 60px);
+    }
+
+    /* Leaflet Map Container (Gate 3A) */
+    #map {
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Overlay Sidebar Controls */
+    .gis-panel {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 999;
+      width: 320px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+    }
+
+    .gis-panel h2 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--accent-blue);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-card .value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent-orange);
+    }
+
+    .stat-card .label {
+      font-size: 11px;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+
+    /* Temperature Legend */
+    .legend-box {
+      margin-top: 12px;
+    }
+
+    .legend-box h3 {
+      font-size: 12px;
+      color: var(--text-sub);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .legend-items {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    .color-pill {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+    }
+
+    /* Bottom Chart Panel */
+    .chart-panel {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 999;
+      width: 440px;
+      height: 240px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+    }
+
+    .chart-panel h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-blue);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chart-wrapper {
+      width: 100%;
+      height: 180px;
+    }
+
+    /* Leaflet Custom Popup Styling (Gate 3C) */
+    .leaflet-popup-content-wrapper {
+      background: rgba(15, 23, 42, 0.95) !important;
+      color: #f8fafc !important;
+      border: 1px solid rgba(56, 189, 248, 0.4) !important;
+      border-radius: 12px !important;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5) !important;
+    }
+    .leaflet-popup-tip {
+      background: rgba(15, 23, 42, 0.95) !important;
+    }
+    .popup-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent-blue);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+    }
+    .popup-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+    .popup-temp {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent-orange);
+      margin: 6px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header>
+    <div class="brand">
+      <i class="fa-solid fa-cloud-sun-rain"></i>
+      <h1>Taiwan Weather GIS Dashboard</h1>
+    </div>
+
+    <div class="header-controls">
+      <label for="region-select" style="font-size: 12px; color: var(--text-sub);">選擇地區：</label>
+      <select id="region-select" onchange="filterRegion()">
+        <option value="全臺地區">全臺地區 (All Taiwan)</option>
+        <option value="北部地區">北部地區</option>
+        <option value="中部地區">中部地區</option>
+        <option value="南部地區">南部地區</option>
+        <option value="東部地區">東部地區</option>
+        <option value="離島地區">離島地區</option>
+      </select>
+
+      <button class="btn-primary" onclick="refreshData()">
+        <i class="fa-solid fa-arrows-rotate"></i> 重新整理
+      </button>
+    </div>
+  </header>
+
+  <!-- Main GIS Viewport -->
+  <div id="main-container">
+    <!-- Leaflet Map Container -->
+    <div id="map"></div>
+
+    <!-- GIS Control Sidebar Panel -->
+    <div class="gis-panel">
+      <h2><i class="fa-solid fa-layer-group"></i> GIS 數據概覽</h2>
+      
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="value" id="stat-count">0</div>
+          <div class="label">監測地點</div>
+        </div>
+        <div class="stat-card">
+          <div class="value" id="stat-avg-temp">--°C</div>
+          <div class="label">全臺平均氣溫</div>
+        </div>
+      </div>
+
+      <div class="legend-box">
+        <h3><i class="fa-solid fa-palette"></i> 氣溫顏色圖例 (Legend)</h3>
+        <div class="legend-items">
+          <div class="legend-item"><div class="color-pill" style="background:#2b6cb0;"></div> &lt; 20°C (寒冷)</div>
+          <div class="legend-item"><div class="color-pill" style="background:#38a169;"></div> 20 – 25°C (舒適)</div>
+          <div class="legend-item"><div class="color-pill" style="background:#ecc94b;"></div> 25 – 30°C (溫暖)</div>
+          <div class="legend-item"><div class="color-pill" style="background:#e53e3e;"></div> &gt; 30°C (炎熱)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Chart Panel (MaxT / MinT Trend) -->
+    <div class="chart-panel">
+      <h3><i class="fa-solid fa-chart-line"></i> 各地區最高與最低氣溫 (MaxT / MinT)</h3>
+      <div class="chart-wrapper">
+        <canvas id="tempChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // 3A: Initialize Leaflet Map Centered on Taiwan
+    const map = L.map('map', {
+      zoomControl: true
+    }).setView([23.7, 120.95], 7.5);
+
+    // OpenStreetMap Dark/CartoDB Tile Layer
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19
+    }).addTo(map);
+
+    let markersLayer = L.layerGroup().addTo(map);
+    let currentGeoJsonData = null;
+    let tempChart = null;
+
+    // Gate 3B & 3C: Color Scale & Markers
+    function getColorByTemp(temp) {
+      if (temp < 20) return '#2b6cb0'; // Blue
+      if (temp < 25) return '#38a169'; // Green
+      if (temp < 30) return '#ecc94b'; // Yellow
+      return '#e53e3e'; // Red
+    }
+
+    // Gate 3E: Fetch Data from DB -> GIS Endpoint
+    async function loadGisData(region = '全臺地區') {
+      try {
+        const url = `/api/gis/locations?region=${encodeURIComponent(region)}`;
+        const res = await fetch(url);
+        const geojson = await res.json();
+        currentGeoJsonData = geojson;
+
+        renderMarkers(geojson.features);
+        updateStats(geojson.features);
+        updateChart(geojson.features);
+      } catch (err) {
+        console.error('Error fetching GIS locations:', err);
+      }
+    }
+
+    // Gate 3D: Bind all Taiwan Locations
+    function renderMarkers(features) {
+      markersLayer.clearLayers();
+
+      features.forEach(feature => {
+        const [lon, lat] = feature.geometry.coordinates;
+        const props = feature.properties;
+        const color = getColorByTemp(props.avg_temp);
+
+        // Circle Marker
+        const marker = L.circleMarker([lat, lon], {
+          radius: 9,
+          fillColor: color,
+          color: '#ffffff',
+          weight: 2,
+          opacity: 0.9,
+          fillOpacity: 0.85
+        });
+
+        // 3C: Interactive Popup
+        const popupContent = `
+          <div class="popup-title">${props.location_name} (${props.region})</div>
+          <div class="popup-temp">${props.avg_temp}°C</div>
+          <div class="popup-row"><span>天氣現象:</span> <strong>${props.weather}</strong></div>
+          <div class="popup-row"><span>最低溫:</span> <span>${props.min_temp}°C</span></div>
+          <div class="popup-row"><span>最高溫:</span> <span>${props.max_temp}°C</span></div>
+          <div class="popup-row"><span>降雨機率:</span> <span>${props.pop}%</span></div>
+          <div style="font-size:10px; color:#94a3b8; margin-top:6px;">數據時間: ${props.start_time || '即時資料'}</div>
+        `;
+
+        marker.bindPopup(popupContent);
+        marker.addTo(markersLayer);
+      });
+    }
+
+    function updateStats(features) {
+      document.getElementById('stat-count').innerText = features.length;
+      if (features.length > 0) {
+        const total = features.reduce((sum, f) => sum + f.properties.avg_temp, 0);
+        const avg = (total / features.length).toFixed(1);
+        document.getElementById('stat-avg-temp').innerText = `${avg}°C`;
+      }
+    }
+
+    // Render MaxT / MinT Line Chart
+    function updateChart(features) {
+      const labels = features.map(f => f.properties.location_name);
+      const minTemps = features.map(f => f.properties.min_temp);
+      const maxTemps = features.map(f => f.properties.max_temp);
+
+      const ctx = document.getElementById('tempChart').getContext('2d');
+
+      if (tempChart) {
+        tempChart.destroy();
+      }
+
+      tempChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: '最高氣溫 (MaxT)',
+              data: maxTemps,
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              tension: 0.3,
+              fill: false,
+              borderWidth: 2
+            },
+            {
+              label: '最低氣溫 (MinT)',
+              data: minTemps,
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              tension: 0.3,
+              fill: false,
+              borderWidth: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              ticks: { color: '#94a3b8', font: { size: 10 } },
+              grid: { color: 'rgba(255,255,255,0.05)' }
+            },
+            y: {
+              ticks: { color: '#94a3b8', font: { size: 10 } },
+              grid: { color: 'rgba(255,255,255,0.05)' }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: { color: '#f8fafc', font: { size: 11 } }
+            }
+          }
+        }
+      });
+    }
+
+    function filterRegion() {
+      const selected = document.getElementById('region-select').value;
+      loadGisData(selected);
+    }
+
+    async function refreshData() {
+      await fetch('/api/gis/refresh');
+      const selected = document.getElementById('region-select').value;
+      loadGisData(selected);
+    }
+
+    // Initial load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadGisData();
+    });
+  </script>
+</body>
+</html>
