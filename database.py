@@ -3,7 +3,11 @@ import os
 import logging
 from typing import List, Dict, Any
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "data.db")
+# On Vercel Serverless environment, local filesystem is read-only except /tmp
+if os.getenv("VERCEL") or not os.access(os.path.dirname(__file__), os.W_OK):
+    DB_PATH = "/tmp/data.db"
+else:
+    DB_PATH = os.path.join(os.path.dirname(__file__), "data.db")
 
 def get_connection():
     conn = sqlite3.connect(DB_PATH)
@@ -11,6 +15,8 @@ def get_connection():
     return conn
 
 def init_db():
+    # Ensure /tmp directory exists on serverless if needed
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("""
