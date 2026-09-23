@@ -2,6 +2,8 @@
 
 [![Taiwan Weather Forecast](https://img.shields.io/badge/AIoT--L3-CWA--Weather-blue.svg)](#) [![Python FastAPI](https://img.shields.io/badge/Backend-FastAPI-green.svg)](#) [![Windy API Leaflet](https://img.shields.io/badge/Frontend-Windy%20%2B%20Leaflet-orange.svg)](#)
 
+![Taiwan Weather GIS Roadmap - Courage the Cowardly Dog](static/weather_roadmap_courage.jpg)
+
 ---
 
 ## 0. Course Roadmap & Learning Pipeline (AI 創新微課程)
