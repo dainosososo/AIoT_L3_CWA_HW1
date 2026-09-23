@@ -15,13 +15,15 @@
 
   <style>
     :root {
-      --bg-dark: #0f172a;
-      --panel-bg: rgba(30, 41, 59, 0.85);
-      --panel-border: rgba(255, 255, 255, 0.1);
-      --accent-blue: #38bdf8;
-      --accent-orange: #fb923c;
-      --text-main: #f8fafc;
-      --text-sub: #94a3b8;
+      --bg-pink: #fdf2f8;
+      --panel-bg: rgba(255, 245, 247, 0.92);
+      --panel-border: rgba(244, 114, 182, 0.35);
+      --accent-pink: #ec4899;
+      --accent-pink-dark: #be185d;
+      --accent-orange: #ea580c;
+      --text-main: #831843;
+      --text-sub: #9d174d;
+      --card-bg: rgba(255, 228, 230, 0.65);
     }
 
     * {
@@ -32,7 +34,7 @@
 
     body {
       font-family: 'Outfit', 'Noto Sans TC', sans-serif;
-      background-color: var(--bg-dark);
+      background-color: var(--bg-pink);
       color: var(--text-main);
       height: 100vh;
       overflow: hidden;
@@ -43,7 +45,7 @@
     /* Top Bar Header */
     header {
       height: 60px;
-      background: rgba(15, 23, 42, 0.95);
+      background: rgba(253, 242, 248, 0.95);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--panel-border);
       display: flex;
@@ -61,14 +63,14 @@
 
     .brand i {
       font-size: 24px;
-      color: var(--accent-blue);
+      color: var(--accent-pink);
     }
 
     .brand h1 {
       font-size: 18px;
       font-weight: 700;
       letter-spacing: 0.5px;
-      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      background: linear-gradient(135deg, #ec4899, #be185d);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -80,8 +82,8 @@
     }
 
     select, button {
-      background: #1e293b;
-      color: #f8fafc;
+      background: #ffffff;
+      color: var(--text-main);
       border: 1px solid var(--panel-border);
       padding: 8px 14px;
       border-radius: 8px;
@@ -92,18 +94,20 @@
     }
 
     select:hover, button:hover {
-      border-color: var(--accent-blue);
-      background: #334155;
+      border-color: var(--accent-pink);
+      background: #fdf2f8;
     }
 
     button.btn-primary {
-      background: linear-gradient(135deg, #0284c7, #2563eb);
+      background: linear-gradient(135deg, #f472b6, #db2777);
+      color: #ffffff;
       border: none;
       font-weight: 600;
+      box-shadow: 0 4px 6px -1px rgba(219, 39, 119, 0.2);
     }
 
     button.btn-primary:hover {
-      opacity: 0.9;
+      opacity: 0.95;
       transform: translateY(-1px);
     }
 
@@ -113,6 +117,7 @@
       position: relative;
       width: 100%;
       height: calc(100vh - 60px);
+      background-color: var(--bg-pink);
     }
 
     /* Leaflet Map Container */
@@ -120,6 +125,7 @@
       width: 100%;
       height: 100%;
       z-index: 1;
+      background-color: var(--bg-pink);
     }
 
     /* Overlay Sidebar Controls */
@@ -134,13 +140,13 @@
       border: 1px solid var(--panel-border);
       border-radius: 16px;
       padding: 20px;
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+      box-shadow: 0 20px 25px -5px rgba(219, 39, 119, 0.15);
     }
 
     .gis-panel h2 {
       font-size: 15px;
       font-weight: 600;
-      color: var(--accent-blue);
+      color: var(--accent-pink-dark);
       margin-bottom: 12px;
       display: flex;
       align-items: center;
@@ -155,8 +161,8 @@
     }
 
     .stat-card {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
       border-radius: 10px;
       padding: 12px;
       text-align: center;
@@ -165,7 +171,7 @@
     .stat-card .value {
       font-size: 20px;
       font-weight: 700;
-      color: var(--accent-orange);
+      color: var(--accent-pink-dark);
     }
 
     .stat-card .label {
@@ -198,6 +204,7 @@
       align-items: center;
       gap: 10px;
       font-size: 12px;
+      color: var(--text-main);
     }
 
     .color-pill {
@@ -219,13 +226,13 @@
       border: 1px solid var(--panel-border);
       border-radius: 16px;
       padding: 16px;
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+      box-shadow: 0 20px 25px -5px rgba(219, 39, 119, 0.15);
     }
 
     .chart-panel h3 {
       font-size: 13px;
       font-weight: 600;
-      color: var(--accent-blue);
+      color: var(--accent-pink-dark);
       margin-bottom: 8px;
       display: flex;
       align-items: center;
@@ -239,20 +246,20 @@
 
     /* Leaflet Custom Popup Styling */
     .leaflet-popup-content-wrapper {
-      background: rgba(15, 23, 42, 0.95) !important;
-      color: #f8fafc !important;
-      border: 1px solid rgba(56, 189, 248, 0.4) !important;
+      background: rgba(255, 245, 247, 0.98) !important;
+      color: var(--text-main) !important;
+      border: 1px solid var(--accent-pink) !important;
       border-radius: 12px !important;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5) !important;
+      box-shadow: 0 10px 15px -3px rgba(219, 39, 119, 0.2) !important;
     }
     .leaflet-popup-tip {
-      background: rgba(15, 23, 42, 0.95) !important;
+      background: rgba(255, 245, 247, 0.98) !important;
     }
     .popup-title {
       font-size: 15px;
       font-weight: 700;
-      color: var(--accent-blue);
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      color: var(--accent-pink-dark);
+      border-bottom: 1px solid var(--panel-border);
       padding-bottom: 6px;
       margin-bottom: 8px;
     }
@@ -261,11 +268,12 @@
       justify-content: space-between;
       font-size: 12px;
       margin-bottom: 4px;
+      color: var(--text-main);
     }
     .popup-temp {
       font-size: 18px;
       font-weight: 700;
-      color: var(--accent-orange);
+      color: var(--accent-pink-dark);
       margin: 6px 0;
     }
   </style>
@@ -341,7 +349,7 @@
   <script>
     const map = L.map('map', { zoomControl: true }).setView([23.7, 120.95], 7.5);
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; OpenStreetMap &copy; CARTO',
       maxZoom: 19
     }).addTo(map);
@@ -452,10 +460,10 @@
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
-            y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+            x: { ticks: { color: '#9d174d', font: { size: 10 } }, grid: { color: 'rgba(244, 114, 182, 0.15)' } },
+            y: { ticks: { color: '#9d174d', font: { size: 10 } }, grid: { color: 'rgba(244, 114, 182, 0.15)' } }
           },
-          plugins: { legend: { labels: { color: '#f8fafc', font: { size: 11 } } } }
+          plugins: { legend: { labels: { color: '#831843', font: { size: 11 } } } }
         }
       });
     }
